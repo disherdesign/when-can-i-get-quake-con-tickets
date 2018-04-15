@@ -13,12 +13,30 @@ import (
     "net/url"
     "strings"
     "golang.org/x/net/html"
+    "time"
 )
 
 var mainContent html.Attribute = html.Attribute{
     Namespace: "",
     Key: "id",
     Val: "main",
+}
+
+var previousContent string
+
+func main() {
+    previousContent = getContent()
+
+    ticker := time.NewTicker(3 * time.Hour)
+    for {
+    <- ticker.C
+        if previousContent != getContent() {
+            fmt.Println("content changed") 
+            sendNotificationEmail() 
+        } else {
+            fmt.Println("same content")
+        }
+    }
 }
 
 func getBody(doc *html.Node) (*html.Node, error) {
@@ -46,7 +64,7 @@ func renderNode(n *html.Node) string {
     return buf.String()
 }
 
-func main() {
+func getContent() string {
     options := cookiejar.Options{
         PublicSuffixList: publicsuffix.List,
     }
@@ -81,8 +99,8 @@ func main() {
     doc, _ := html.Parse(strings.NewReader(htm))
     bn, err := getBody(doc)
     if err != nil {
-        return
+        log.Println(err)
     }
-    body := renderNode(bn)
-    fmt.Println(body)
+    mainDiv := renderNode(bn)
+    return mainDiv 
 }
