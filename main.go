@@ -15,11 +15,17 @@ import (
     "golang.org/x/net/html"
 )
 
+var mainContent html.Attribute = html.Attribute{
+    Namespace: "",
+    Key: "id",
+    Val: "main",
+}
+
 func getBody(doc *html.Node) (*html.Node, error) {
     var b *html.Node
     var f func(*html.Node)
     f = func(n *html.Node) {
-        if n.Type == html.ElementNode && n.Data == "body" {
+        if n.Type == html.ElementNode && n.Data == "div" && n.Attr[0] == mainContent {
             b = n
         }
         for c := n.FirstChild; c != nil; c = c.NextSibling {
